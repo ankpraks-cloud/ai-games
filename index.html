@@ -2,51 +2,117 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>MiniCraft JS</title>
+  <title>MiniCraft JS V4</title>
   <style>
-    body { margin:0; overflow:hidden; background:#87ceeb; font-family:Arial, sans-serif; }
+    body { margin:0; overflow:hidden; background:#111; font-family:Arial, sans-serif; }
+    #menu {
+      position:absolute; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(#5fb9ff, #3fa34d); color:white; text-align:center;
+    }
+    #menuBox {
+      background:rgba(0,0,0,.55); padding:35px; border-radius:18px; width:520px;
+      box-shadow:0 0 30px rgba(0,0,0,.45);
+    }
+    #menu h1 { font-size:58px; margin:0 0 10px; text-shadow:4px 4px #333; }
+    #menu p { font-size:16px; line-height:1.5; }
+    button {
+      font-size:24px; padding:14px 36px; border:0; border-radius:10px; cursor:pointer;
+      background:gold; margin-top:14px; font-weight:bold;
+    }
+    button:hover { transform:scale(1.05); }
     #ui {
-      position:absolute; top:10px; left:10px; color:white; background:rgba(0,0,0,.45);
-      padding:10px; border-radius:8px; font-size:14px; z-index:10;
+      position:absolute; top:10px; left:10px; z-index:10; color:white;
+      background:rgba(0,0,0,.5); padding:10px; border-radius:8px; font-size:14px;
+      display:none;
     }
     #crosshair {
       position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      color:white; font-size:28px; z-index:10; pointer-events:none;
+      color:white; font-size:30px; z-index:10; pointer-events:none; text-shadow:0 0 4px black;
+      display:none;
     }
     #hotbar {
       position:absolute; bottom:25px; left:50%; transform:translateX(-50%);
-      display:flex; gap:6px; z-index:10;
+      display:none; gap:6px; z-index:10;
     }
     .slot {
-      width:54px; height:54px; border:2px solid #777; background:rgba(255,255,255,.25);
-      color:white; display:flex; align-items:center; justify-content:center; flex-direction:column;
-      font-size:11px;
+      width:58px; height:58px; border:2px solid #666; background:rgba(0,0,0,.45);
+      color:white; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      font-size:11px; border-radius:4px;
     }
-    .selected { border:3px solid gold; background:rgba(255,215,0,.35); }
+    .selected { border:3px solid gold; background:rgba(255,215,0,.25); }
     #inventory {
       position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      background:rgba(20,20,20,.9); color:white; padding:20px; border-radius:10px;
-      display:none; z-index:20; width:420px;
+      width:480px; display:none; z-index:20; background:rgba(20,20,20,.92);
+      color:white; border-radius:10px; padding:20px;
     }
     #invgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .invitem { background:#444; padding:12px; border-radius:6px; text-align:center; }
+    .invitem { background:#444; border-radius:6px; padding:12px; text-align:center; }
     #death {
-      position:absolute; left:50%; top:38%; transform:translate(-50%,-50%);
-      color:red; font-size:64px; display:none; z-index:30; text-align:center;
+      position:absolute; display:none; left:50%; top:38%; transform:translate(-50%,-50%);
+      color:red; font-size:64px; text-align:center; z-index:30; text-shadow:0 0 6px black;
+    }
+    #crafting {
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:520px; max-height:70vh; overflow-y:auto; display:none; z-index:22;
+      background:rgba(25,18,12,.94); color:white; border-radius:12px; padding:20px;
+      border:2px solid #8b5a2b;
+    }
+    .recipe {
+      background:#3b2a1a; border:1px solid #8b5a2b; padding:12px; margin:8px 0;
+      border-radius:8px; cursor:pointer;
+    }
+    .recipe:hover { background:#5a3a22; }
+    .creativeItem {
+      background:#263a57; border:1px solid #6fa8dc; padding:12px; margin:8px 0;
+      border-radius:8px; cursor:pointer;
+    }
+    .creativeItem:hover { background:#345a86; }
+    #modeBadge {
+      position:absolute; right:10px; top:10px; z-index:12; color:white;
+      background:rgba(0,0,0,.55); padding:10px; border-radius:8px; display:none;
+    }
+    #message {
+      position:absolute; left:50%; top:28%; transform:translateX(-50%);
+      color:white; background:rgba(0,0,0,.55); padding:8px 14px; border-radius:8px;
+      z-index:15; display:none;
     }
   </style>
 </head>
 <body>
+  <div id="menu">
+    <div id="menuBox">
+      <h1>MiniCraft</h1>
+      <h2>JS V4: Village Spawn</h2>
+      <p>
+        Spawn in a village, explore chunk-loaded terrain, open chests, fight improved zombies,
+        and build with better pixel-style blocks.
+      </p>
+      <button id="startBtn">Start Game</button>
+      <p style="font-size:13px">Click Start, then click inside the game to lock the mouse.</p>
+    </div>
+  </div>
+
   <div id="ui">
-    WASD Move | Mouse Look | Space Jump | R Break/Attack | E Place | C Chest | Tab Inventory<br>
-    Health: <span id="health">10</span> | Hunger: <span id="hunger">10</span>
+    <b>MiniCraft JS V4</b><br>
+    WASD Move | Mouse Look | Space Jump/Fly Up | Shift Sprint/Fly Down<br>
+    R Break/Attack | E Place | C Chest | Tab Backpack | Q Crafting | L Creative | Fly in Creative<br>
+    Health: <span id="health">10</span> | Hunger: <span id="hunger">10</span> | Chunks: <span id="chunks">0</span>
   </div>
   <div id="crosshair">+</div>
+  <div id="modeBadge">SURVIVAL</div>
+  <div id="message"></div>
   <div id="hotbar"></div>
-  <div id="inventory"><h2>Inventory</h2><div id="invgrid"></div></div>
+  <div id="inventory"><h2>Backpack Inventory</h2><p>Your hotbar starts full. Your backpack starts empty. Chests and crafting add items here.</p><div id="invgrid"></div></div>
+  <div id="crafting">
+    <h2>Crafting</h2>
+    <p>Click a recipe to craft it.</p>
+    <div id="recipes"></div>
+  </div>
   <div id="death">YOU DIED<br><span style="font-size:28px">Press R to respawn</span></div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
+
+
