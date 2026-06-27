@@ -1,118 +1,205 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>MiniCraft JS V4</title>
-  <style>
-    body { margin:0; overflow:hidden; background:#111; font-family:Arial, sans-serif; }
-    #menu {
-      position:absolute; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(#5fb9ff, #3fa34d); color:white; text-align:center;
-    }
-    #menuBox {
-      background:rgba(0,0,0,.55); padding:35px; border-radius:18px; width:520px;
-      box-shadow:0 0 30px rgba(0,0,0,.45);
-    }
-    #menu h1 { font-size:58px; margin:0 0 10px; text-shadow:4px 4px #333; }
-    #menu p { font-size:16px; line-height:1.5; }
-    button {
-      font-size:24px; padding:14px 36px; border:0; border-radius:10px; cursor:pointer;
-      background:gold; margin-top:14px; font-weight:bold;
-    }
-    button:hover { transform:scale(1.05); }
-    #ui {
-      position:absolute; top:10px; left:10px; z-index:10; color:white;
-      background:rgba(0,0,0,.5); padding:10px; border-radius:8px; font-size:14px;
-      display:none;
-    }
-    #crosshair {
-      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      color:white; font-size:30px; z-index:10; pointer-events:none; text-shadow:0 0 4px black;
-      display:none;
-    }
-    #hotbar {
-      position:absolute; bottom:25px; left:50%; transform:translateX(-50%);
-      display:none; gap:6px; z-index:10;
-    }
-    .slot {
-      width:58px; height:58px; border:2px solid #666; background:rgba(0,0,0,.45);
-      color:white; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      font-size:11px; border-radius:4px;
-    }
-    .selected { border:3px solid gold; background:rgba(255,215,0,.25); }
-    #inventory {
-      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      width:480px; display:none; z-index:20; background:rgba(20,20,20,.92);
-      color:white; border-radius:10px; padding:20px;
-    }
-    #invgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .invitem { background:#444; border-radius:6px; padding:12px; text-align:center; }
-    #death {
-      position:absolute; display:none; left:50%; top:38%; transform:translate(-50%,-50%);
-      color:red; font-size:64px; text-align:center; z-index:30; text-shadow:0 0 6px black;
-    }
-    #crafting {
-      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      width:520px; max-height:70vh; overflow-y:auto; display:none; z-index:22;
-      background:rgba(25,18,12,.94); color:white; border-radius:12px; padding:20px;
-      border:2px solid #8b5a2b;
-    }
-    .recipe {
-      background:#3b2a1a; border:1px solid #8b5a2b; padding:12px; margin:8px 0;
-      border-radius:8px; cursor:pointer;
-    }
-    .recipe:hover { background:#5a3a22; }
-    .creativeItem {
-      background:#263a57; border:1px solid #6fa8dc; padding:12px; margin:8px 0;
-      border-radius:8px; cursor:pointer;
-    }
-    .creativeItem:hover { background:#345a86; }
-    #modeBadge {
-      position:absolute; right:10px; top:10px; z-index:12; color:white;
-      background:rgba(0,0,0,.55); padding:10px; border-radius:8px; display:none;
-    }
-    #message {
-      position:absolute; left:50%; top:28%; transform:translateX(-50%);
-      color:white; background:rgba(0,0,0,.55); padding:8px 14px; border-radius:8px;
-      z-index:15; display:none;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>MiniCraft 3D v0.3 World + Mobs</title>
+<style>
+html,body{margin:0;overflow:hidden;background:#000;font-family:Arial,sans-serif}
+canvas{display:block}
+#menu{position:fixed;inset:0;background:linear-gradient(#102030,#3b120a);color:white;display:flex;align-items:center;justify-content:center;text-align:center;z-index:20}
+#box{width:780px;background:#000d;border:3px solid #ffb000;border-radius:18px;padding:30px;box-shadow:0 0 35px #000}
+h1{font-size:52px;margin:0;color:#ffd23c;text-shadow:4px 4px #000}
+button{font-size:22px;font-weight:bold;background:#ffd23c;border:0;border-radius:12px;padding:14px 32px;margin:10px;cursor:pointer}
+#hud{display:none;position:fixed;left:10px;top:10px;color:white;background:#000a;padding:10px;border-radius:8px;z-index:5;font-size:14px}
+#cross{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:32px;color:white;text-shadow:0 0 5px black;z-index:5}
+#hotbar{display:none;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);gap:6px;z-index:5}
+.slot{width:72px;height:72px;background:#000a;color:white;border:2px solid #777;border-radius:7px;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.sel{border:3px solid #ffd23c;background:#704000cc}
+.icon{font-size:25px}.count{position:absolute;right:4px;bottom:3px;background:#000;padding:0 4px;border-radius:4px}
+#msg{display:none;position:fixed;left:50%;top:28%;transform:translateX(-50%);background:#000c;color:white;padding:8px 14px;border-radius:8px;z-index:8}
+#error{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#300;color:white;padding:20px;border:2px solid red;border-radius:10px;z-index:99;max-width:700px}
+#minimapBox{display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#000a;color:white;border-radius:8px;padding:7px;text-align:center;z-index:6;font-size:12px}
+#minimap{width:210px;height:74px;border:2px solid #777;display:flex;position:relative;overflow:hidden;background:#111}
+.mapZone{height:100%;flex:1;display:flex;align-items:flex-start;justify-content:center;color:white;font-size:11px;font-weight:bold;text-shadow:1px 1px #000;padding-top:4px}
+#zoneVolcano{background:#7a1b12}
+#zonePlains{background:#2f9b3c}
+#zoneIce{background:#9ddfff}
+#playerDot{position:absolute;width:12px;height:12px;border-radius:50%;background:#ffff00;border:2px solid #000;left:102px;top:31px;box-sizing:border-box}
+</style>
 </head>
 <body>
-  <div id="menu">
-    <div id="menuBox">
-      <h1>MiniCraft</h1>
-      <h2>JS V4: Village Spawn</h2>
-      <p>
-        Spawn in a village, explore chunk-loaded terrain, open chests, fight improved zombies,
-        and build with better pixel-style blocks.
-      </p>
-      <button id="startBtn">Start Game</button>
-      <p style="font-size:13px">Click Start, then click inside the game to lock the mouse.</p>
-    </div>
+<div id="menu"><div id="box">
+<h1>MINICRAFT 3D v0.7</h1>
+<h2>World + Mobs Update</h2>
+<p>New structures, more trees, rivers, friendly animals, and better mob shapes/textures.</p>
+<button id="startBtn">START GAME</button>
+<p><b>Controls:</b> WASD move · Mouse look · Space jump · Left click mine/attack · Right click place · F shoot · M spectator · 1-9 hotbar</p>
+</div></div>
+<div id="hud">
+<b>MiniCraft 3D v0.3</b><br>
+WASD | Mouse | Space | Left mine/attack | Right place | F shoot | M spectator<br>
+Health: <span id="hp">100</span> | Map points left to Ice biome | Mode: <span id="mode">survival</span> | Mobs: <span id="mobs">0</span> | Blocks: <span id="blocks">0</span> | Biome: <span id="biome">?</span>
+</div>
+<div id="minimapBox">
+  <div id="minimap">
+    <div id="zoneVolcano" class="mapZone">🌋 Volcano</div>
+    <div id="zonePlains" class="mapZone">🌲 Plains</div>
+    <div id="zoneIce" class="mapZone">❄️ Ice</div>
+    <div id="playerDot"></div>
   </div>
+  <div>Move left to reach the Ice biome</div>
+</div>
+<div id="cross">+</div>
+<div id="hotbar"></div>
+<div id="msg"></div>
+<div id="error"></div>
+<script>
+window.onerror=function(msg){let e=document.getElementById('error');e.style.display='block';e.innerHTML='<b>Game error:</b><br>'+msg+'<br><br>If it says THREE is not defined, check Wi-Fi and use Chrome/Edge.'}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(function(){
+if(!window.THREE){document.getElementById('error').style.display='block';document.getElementById('error').innerHTML='Three.js did not load. Turn Wi-Fi on and open in Chrome or Edge.';return}
 
-  <div id="ui">
-    <b>MiniCraft JS V4</b><br>
-    WASD Move | Mouse Look | Space Jump/Fly Up | Shift Sprint/Fly Down<br>
-    R Break/Attack | E Place | C Chest | Tab Backpack | Q Crafting | L Creative | Fly in Creative<br>
-    Health: <span id="health">10</span> | Hunger: <span id="hunger">10</span> | Chunks: <span id="chunks">0</span>
-  </div>
-  <div id="crosshair">+</div>
-  <div id="modeBadge">SURVIVAL</div>
-  <div id="message"></div>
-  <div id="hotbar"></div>
-  <div id="inventory"><h2>Backpack Inventory</h2><p>Your hotbar starts full. Your backpack starts empty. Chests and crafting add items here.</p><div id="invgrid"></div></div>
-  <div id="crafting">
-    <h2>Crafting</h2>
-    <p>Click a recipe to craft it.</p>
-    <div id="recipes"></div>
-  </div>
-  <div id="death">YOU DIED<br><span style="font-size:28px">Press R to respawn</span></div>
+const BLOCKS={
+ grass:{name:'Grass',color:0x43b84a,icon:'🌱',place:true,kind:'grass'},dirt:{name:'Dirt',color:0x7a4b23,icon:'🟫',place:true,kind:'dirt'},
+ stone:{name:'Stone',color:0x777777,icon:'🪨',place:true,kind:'stone'},wood:{name:'Oak Wood',color:0x8b5a2b,icon:'🪵',place:true,kind:'wood'},
+ pine:{name:'Pine Wood',color:0x4d2f16,icon:'🌲',place:true,kind:'wood'},jungle:{name:'Jungle Wood',color:0x7b4b25,icon:'🌴',place:true,kind:'wood'},
+ leaves:{name:'Leaves',color:0x2e8b57,icon:'🍃',place:true,kind:'leaves'},pineLeaves:{name:'Pine Leaves',color:0x0f5f3c,icon:'🌲',place:true,kind:'leaves'},
+ sand:{name:'Sand',color:0xddcc82,icon:'🏖️',place:true,kind:'sand'},water:{name:'Water',color:0x3388ff,icon:'💧',place:true,kind:'water'},
+ snow:{name:'Snow',color:0xeef6ff,icon:'❄️',place:true,kind:'ice'},
+ ice:{name:'Ice',color:0xaeefff,icon:'🧊',place:true,kind:'ice'},
+ blueice:{name:'Blue Ice',color:0x66ccff,icon:'🧊',place:true,kind:'ice'},
+ basalt:{name:'Basalt',color:0x171717,icon:'⬛',place:true,kind:'brick'},redash:{name:'Red Ash',color:0x8b1a1a,icon:'🟥',place:true,kind:'brick'},
+ obsidian:{name:'Obsidian',color:0x120018,icon:'◾',place:true,kind:'stone'},lava:{name:'Lava',color:0xff3300,icon:'🌋',place:true,emissive:true,kind:'lava'},
+ crystal:{name:'Crystal',color:0x44eeee,icon:'🔷',place:true,kind:'ore'},brick:{name:'Brick',color:0xaa4433,icon:'🧱',place:true,kind:'brick'},
+ roof:{name:'Roof',color:0x654321,icon:'▰',place:true,kind:'wood'},glass:{name:'Glass',color:0xbdefff,icon:'🪟',place:true,kind:'glass'},
+ hay:{name:'Hay',color:0xd8b82a,icon:'🌾',place:true,kind:'sand'},pickaxe:{name:'Pickaxe',color:0xaaaaaa,icon:'⛏️'},
+ sword:{name:'Diamond Sword',color:0x44eeee,icon:'💎'},blaster:{name:'Voxel Blaster',color:0x4444aa,icon:'🔫'},
+ m16:{name:'M16 Blaster',color:0x225533,icon:'🔫'},ammo:{name:'Ammo',color:0xdddd44,icon:'•'},bread:{name:'Bread',color:0xd6a64c,icon:'🍞'}
+};
+let hotbar=[{id:'blaster',count:1},{id:'m16',count:1},{id:'pickaxe',count:1},{id:'sword',count:1},{id:'ammo',count:120},{id:'basalt',count:64},{id:'redash',count:64},{id:'brick',count:48},{id:'wood',count:32}];
+let selected=0,started=false,spectator=false,keys={};
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="game.js"></script>
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,45,135);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,300);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});renderer.setPixelRatio(1);renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,.62));let sun=new THREE.DirectionalLight(0xffffff,1.15);sun.position.set(50,90,40);scene.add(sun);
+
+function texture(key){
+ let d=BLOCKS[key],c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=c.height=32;
+ ctx.fillStyle='#'+d.color.toString(16).padStart(6,'0');ctx.fillRect(0,0,32,32);
+ function noise(n,a){for(let i=0;i<n;i++){ctx.fillStyle=Math.random()>.5?`rgba(255,255,255,${a})`:`rgba(0,0,0,${a})`;ctx.fillRect(Math.random()*32|0,Math.random()*32|0,2,2)}} noise(50,.18);
+ if(d.kind==='grass'){ctx.fillStyle='#2fa53a';ctx.fillRect(0,0,32,9);ctx.fillStyle='#7a4b23';ctx.fillRect(0,23,32,9);noise(25,.12)}
+ if(d.kind==='wood'){ctx.strokeStyle='rgba(0,0,0,.45)';for(let y=5;y<32;y+=7){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(32,y+2);ctx.stroke()}ctx.strokeStyle='rgba(255,255,255,.18)';ctx.strokeRect(5,5,22,22)}
+ if(d.kind==='brick'){ctx.strokeStyle='rgba(0,0,0,.55)';for(let y=0;y<32;y+=8){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(32,y);ctx.stroke()}for(let x=0;x<32;x+=12){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+3,32);ctx.stroke()}}
+ if(d.kind==='stone'){ctx.strokeStyle='rgba(0,0,0,.35)';for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(Math.random()*32,Math.random()*32);ctx.lineTo(Math.random()*32,Math.random()*32);ctx.stroke()}}
+ if(d.kind==='leaves'){ctx.fillStyle='rgba(255,255,255,.18)';for(let i=0;i<14;i++)ctx.fillRect(Math.random()*27|0,Math.random()*27|0,5,5)}
+ if(d.kind==='water'){ctx.fillStyle='rgba(255,255,255,.35)';for(let y=6;y<32;y+=8)ctx.fillRect(0,y,32,2)}
+ if(d.kind==='lava'){ctx.fillStyle='#ff3300';ctx.fillRect(0,0,32,32);ctx.strokeStyle='#ffaa00';ctx.lineWidth=3;for(let y=4;y<32;y+=8){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(32,y+3);ctx.stroke()}ctx.fillStyle='#ffff55';ctx.fillRect(8,8,6,6);ctx.fillRect(21,20,4,4)}
+ if(d.kind==='ore'){ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillRect(7,7,7,7);ctx.fillRect(20,19,5,5)}
+ let t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;return t;
+}
+const materials={};for(let k in BLOCKS){materials[k]=new THREE.MeshLambertMaterial({map:texture(k),transparent:BLOCKS[k].kind==='water'||BLOCKS[k].kind==='glass',opacity:BLOCKS[k].kind==='water'?.68:BLOCKS[k].kind==='glass'?.45:1,emissive:BLOCKS[k].emissive?BLOCKS[k].color:0,emissiveIntensity:BLOCKS[k].emissive?.75:0})}
+
+function seed(x,z){let n=((Math.floor(x)*73856093)^(Math.floor(z)*19349663))>>>0;return(n%10000)/10000}
+function dist(x,z){return Math.hypot(x,z)}
+function biomeAt(x,z){let d=dist(x,z);if(d<115)return'Volcano';let a=Math.sin(x*.018)+Math.cos(z*.015),b=Math.sin((x-z)*.014);if(a>.9)return'Desert';if(a<-.9)return'Pine Forest';if(b>.75)return'Riverlands';if(a>.25)return'Forest';return'Plains'}
+function riverAt(x,z){let b=biomeAt(x,z);if(b==='Riverlands')return Math.abs(Math.sin(x*.045+Math.cos(z*.03)))<.16;return dist(x,z)>120 && Math.abs(Math.sin(x*.026+z*.015))<.055}
+function heightAt(x,z){let h=Math.floor(Math.sin(x*.035)*6+Math.cos(z*.031)*5+Math.sin((x+z)*.018)*7);let d=dist(x,z);if(d<115){h+=Math.floor(Math.max(0,88-d)*.5);if(d<18)h-=10}return h}
+function lavaRiver(x,z){let d=dist(x,z),a=Math.atan2(z,x);return d<100&&Math.abs(Math.sin(a*3+Math.sin((x+z)*.025)))<.095}
+function topBlock(x,z){let b=biomeAt(x,z);if(b==='Volcano'){if(lavaRiver(x,z))return'lava';let r=seed(x,z);if(r>.86)return'crystal';if(r>.7)return'redash';if(r>.3)return'basalt';return'obsidian'}if(riverAt(x,z))return'water';if(b==='Desert')return'sand';return seed(x,z)>.15?'grass':'dirt'}
+function treeInfo(x,z){let b=biomeAt(x,z);if(b==='Volcano'||b==='Desert'||riverAt(x,z))return null;let spacing=b==='Pine Forest'?7:b==='Forest'?8:13;let gx=Math.round(x/spacing)*spacing,gz=Math.round(z/spacing)*spacing;if(Math.abs(x-gx)<=1&&Math.abs(z-gz)<=1&&seed(gx,gz)>.54){return b==='Pine Forest'?{log:'pine',leaf:'pineLeaves',h:7}:{log:'wood',leaf:'leaves',h:5}}return null}
+
+class World{
+ constructor(){this.chunks=new Map();this.placed=[];this.meshes=[];this.group=new THREE.Group();scene.add(this.group);this.chunkRadius=0;this.maxChunkDistance=1}
+ groundHeight(x,z){let h=heightAt(x,z);for(let p of this.placed)if(Math.floor(p.x)===Math.floor(x)&&Math.floor(p.z)===Math.floor(z)&&p.id!=='lava'&&p.id!=='water')h=Math.max(h,p.y);return h}
+ loadAround(pos){
+    let cx=Math.floor(pos.x/16),cz=Math.floor(pos.z/16);
+    for(let x=cx-this.chunkRadius;x<=cx+this.chunkRadius;x++)for(let z=cz-this.chunkRadius;z<=cz+this.chunkRadius;z++)this.gen(x,z);
+    // v0.5: unload chunks far away so memory does not grow forever
+    for(let [ck,g] of Array.from(this.chunks.entries())){
+      let parts=ck.split(',').map(Number), dx=Math.abs(parts[0]-cx), dz=Math.abs(parts[1]-cz);
+      if(dx>this.maxChunkDistance||dz>this.maxChunkDistance){
+        this.group.remove(g);
+        g.traverse(o=>{ if(o.isMesh){ o.geometry.dispose();  }});
+        this.chunks.delete(ck);
+      }
+    }
+    // Rebuild static mesh list only from loaded chunks
+    this.meshes=[];
+    for(let g of this.chunks.values())g.traverse(o=>{if(o.isMesh)this.meshes.push(o)});
+  }
+ addBlock(x,y,z,id,parent=this.group,placed=false){let m=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),materials[id]);m.position.set(x+.5,y+.5,z+.5);m.userData={type:'block',id,placed};parent.add(m);if(placed)this.placed.push({x,y,z,id,mesh:m});else this.meshes.push(m);return m}
+ removeBlock(mesh){if(!mesh?.userData?.type)return;mesh.parent?.remove(mesh);this.placed=this.placed.filter(p=>p.mesh!==mesh);this.meshes=this.meshes.filter(m=>m!==mesh)}
+ gen(cx,cz){let ck=cx+','+cz;if(this.chunks.has(ck))return;let g=new THREE.Group();this.group.add(g);this.chunks.set(ck,g);for(let lx=0;lx<16;lx++)for(let lz=0;lz<16;lz++){let x=cx*16+lx,z=cz*16+lz,h=heightAt(x,z),top=topBlock(x,z);this.addBlock(x,h,z,top,g,false);let ti=treeInfo(x,z);if(ti)this.tree(x,h+1,z,ti,g)}if(this.shouldStructure(cx,cz))this.structure(cx*16+8,cz*16+8,g,this.structureType(cx,cz))}
+ tree(x,y,z,ti,g){for(let i=0;i<ti.h;i++)this.addBlock(x,y+i,z,ti.log,g,false);let top=y+ti.h;if(ti.leaf==='pineLeaves'){for(let dy=0;dy<4;dy++){let r=3-dy;for(let dx=-r;dx<=r;dx++)for(let dz=-r;dz<=r;dz++)if(Math.abs(dx)+Math.abs(dz)<=r+1)this.addBlock(x+dx,top-dy,z+dz,ti.leaf,g,false)}}else{for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=-1;dy<=2;dy++)if(Math.abs(dx)+Math.abs(dz)+Math.abs(dy)<5)this.addBlock(x+dx,top+dy,z+dz,ti.leaf,g,false)}}
+ shouldStructure(cx,cz){if(cx===3&&cz===1)return true;if(cx===5&&cz===2)return true;if(cx===-4&&cz===5)return true;if(Math.abs(cx)<2&&Math.abs(cz)<2)return false;if(cx%4!==0&&cz%4!==0)return false;return seed(cx,cz)>.55}
+ structureType(cx,cz){let b=biomeAt(cx*16,cz*16);if(b==='Volcano')return'volcano_shrine';let r=seed(cx+33,cz-7);if(r>.75)return'tower';if(r>.45)return'cabin';return'ruin'}
+ structure(x,z,g,type){let y=heightAt(x,z)+1,wall=type==='volcano_shrine'?'basalt':type==='tower'?'brick':'wood',roof=type==='volcano_shrine'?'redash':'roof';if(type==='ruin'){for(let dx=-5;dx<=5;dx++){this.addBlock(x+dx,y,z-5,'stone',g,false);if(dx%2===0)this.addBlock(x+dx,y+1,z-5,'brick',g,false)}for(let dz=-5;dz<=5;dz++)this.addBlock(x-5,y,z+dz,'stone',g,false);this.addBlock(x,y+1,z,'crystal',g,false);return}if(type==='tower'){for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)for(let dy=0;dy<8;dy++){if(dx===-3||dx===3||dz===-3||dz===3||dy===0)this.addBlock(x+dx,y+dy,z+dz,'brick',g,false)}this.addBlock(x,y+8,z,'crystal',g,false);return}for(let dx=-5;dx<=5;dx++)for(let dz=-5;dz<=5;dz++){if(dx===-5||dx===5||dz===-5||dz===5)this.addBlock(x+dx,y,z+dz,wall,g,false);else this.addBlock(x+dx,y,z+dz,'stone',g,false)}for(let dx=-6;dx<=6;dx++){this.addBlock(x+dx,y+1,z-6,roof,g,false);this.addBlock(x+dx,y+2,z-5,roof,g,false);this.addBlock(x+dx,y+3,z-4,roof,g,false);this.addBlock(x+dx,y+1,z+6,roof,g,false);this.addBlock(x+dx,y+2,z+5,roof,g,false);this.addBlock(x+dx,y+3,z+4,roof,g,false)}this.addBlock(x,y+1,z,'crystal',g,false);this.addBlock(x+2,y+1,z,'hay',g,false)}
+}
+class Player{
+ constructor(){this.pos=new THREE.Vector3(58,heightAt(58,18)+8,18);this.yaw=Math.PI;this.pitch=0;this.vy=0;this.hp=100}
+ update(){let sp=keys.ShiftLeft?.20:.12,f=new THREE.Vector3(Math.sin(this.yaw),0,Math.cos(this.yaw)),r=new THREE.Vector3(Math.cos(this.yaw),0,-Math.sin(this.yaw));if(keys.KeyW)this.pos.add(f.clone().multiplyScalar(-sp));if(keys.KeyS)this.pos.add(f.clone().multiplyScalar(sp));if(keys.KeyA)this.pos.add(r.clone().multiplyScalar(-sp));if(keys.KeyD)this.pos.add(r.clone().multiplyScalar(sp));if(spectator){if(keys.Space)this.pos.y+=.25;if(keys.ControlLeft)this.pos.y-=.25;return}let ground=world.groundHeight(this.pos.x,this.pos.z)+1.8;if(this.pos.y<=ground+.08){this.pos.y=ground;this.vy=keys.Space?.24:0}else this.vy-=.011;this.pos.y+=this.vy;let ng=world.groundHeight(this.pos.x,this.pos.z)+1.8;if(this.pos.y<ng){this.pos.y=ng;this.vy=0}}
+}
+class Mobs{
+ constructor(){this.list=[]}
+ spawn(x,z,type='cow'){let g=new THREE.Group();let colors={cow:0x8b5a2b,pig:0xff99aa,chicken:0xffffff,sheep:0xdddddd,wolf:0xaaaaaa,fire_imp:0xff3300,lava_guard:0x660000,zombie:0x35aa45};let color=colors[type]||0xff3300,mat=new THREE.MeshLambertMaterial({color,emissive:(type==='fire_imp'||type==='lava_guard')?color:0,emissiveIntensity:.22});let passive=['cow','pig','chicken','sheep','wolf'].includes(type);if(passive){let body=new THREE.Mesh(new THREE.BoxGeometry(1.1,.65,.7),mat);body.position.y=.55;let head=new THREE.Mesh(new THREE.BoxGeometry(.45,.45,.45),mat);head.position.set(0,.85,-.55);g.add(body,head);for(let lx of[-.35,.35])for(let lz of[-.25,.25]){let leg=new THREE.Mesh(new THREE.BoxGeometry(.16,.45,.16),mat);leg.position.set(lx,.15,lz);g.add(leg)}}else{let body=new THREE.Mesh(new THREE.BoxGeometry(.8,1.3,.55),mat);body.position.y=.65;let head=new THREE.Mesh(new THREE.BoxGeometry(.55,.55,.55),mat);head.position.y=1.55;g.add(body,head)}let bar=new THREE.Mesh(new THREE.BoxGeometry(1.3,.08,.05),new THREE.MeshBasicMaterial({color:0x00ff00}));bar.position.y=passive?1.35:2.25;g.add(bar);g.position.set(x,world.groundHeight(x,z)+1,z);let hp=passive?30:type==='lava_guard'?90:45;g.userData={type,hp,max:hp,bar,cd:0,passive};scene.add(g);this.list.push(g)}
+ update(){if(this.list.length<10&&Math.random()<.012){let a=Math.random()*Math.PI*2,r=24+Math.random()*45,x=player.pos.x+Math.cos(a)*r,z=player.pos.z+Math.sin(a)*r,b=biomeAt(x,z);let type=b==='Volcano'?(Math.random()<.45?'lava_guard':'fire_imp'):(['cow','pig','chicken','sheep','wolf','zombie'][Math.floor(seed(x,z)*6)]);this.spawn(x,z,type)}for(let m of this.list){let diff=player.pos.clone().sub(m.position),d=diff.length();if(d<30&&!spectator&&!m.userData.passive){diff.y=0;if(diff.length()>0)m.position.add(diff.normalize().multiplyScalar(m.userData.type==='fire_imp'?.075:.055));m.lookAt(player.pos.x,m.position.y,player.pos.z)}else if(m.userData.passive&&Math.random()<.025){m.position.x+=(Math.random()-.5)*.15;m.position.z+=(Math.random()-.5)*.15}m.position.y=world.groundHeight(m.position.x,m.position.z)+1;let pct=Math.max(0,m.userData.hp/m.userData.max);m.userData.bar.scale.x=pct;m.userData.bar.material.color.setHex(pct>.5?0x00ff00:pct>.25?0xffff00:0xff0000);m.userData.cd-=.016;if(d<1.8&&m.userData.cd<=0&&!spectator&&!m.userData.passive){player.hp-=m.userData.type==='lava_guard'?10:5;m.userData.cd=1;if(player.hp<0)player.hp=0}}this.list=this.list.filter(m=>m.userData.hp>0 && m.position.distanceTo(player.pos)<100)}
+ damage(m,amt){m.userData.hp-=amt;if(m.userData.hp<=0){scene.remove(m);show('Defeated '+m.userData.type)}else show('Hit '+m.userData.type)}
+}
+const world=new World(),player=new Player(),mobs=new Mobs(),raycaster=new THREE.Raycaster();let bullets=[];let frame=0;
+function renderHotbar(){let el=document.getElementById('hotbar');el.innerHTML='';hotbar.forEach((it,i)=>{let b=BLOCKS[it.id],d=document.createElement('div');d.className='slot '+(i===selected?'sel':'');d.innerHTML='<div>'+(i+1)+'</div><div class="icon">'+b.icon+'</div><div>'+b.name+'</div><div class="count">'+it.count+'</div>';d.onclick=()=>{selected=i;renderHotbar()};el.appendChild(d)})}
+function show(t){let e=document.getElementById('msg');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',1200)}
+function aimedHits(){
+  let dir=new THREE.Vector3();camera.getWorldDirection(dir);raycaster.set(camera.position,dir);raycaster.far=7;
+  // v0.5: only raycast nearby objects, not every block in the world
+  const nearPlaced=world.placed.filter(p=>p.mesh.position.distanceTo(player.pos)<9).map(p=>p.mesh);
+  const nearStatic=world.meshes.filter(m=>m.position.distanceTo(player.pos)<9);
+  const nearMobs=mobs.list.filter(m=>m.position.distanceTo(player.pos)<9).flatMap(m=>m.children);
+  return raycaster.intersectObjects([...nearPlaced,...nearStatic,...nearMobs],false)
+}
+function mineAttack(){let hits=aimedHits();if(!hits.length){show('Aim at a block or mob');return}let hit=hits[0];let mob=mobs.list.find(m=>m.children.includes(hit.object));if(mob){mobs.damage(mob,hotbar[selected].id==='sword'?55:15);return}if(hit.object.userData?.type==='block'){world.removeBlock(hit.object);show('Mined '+BLOCKS[hit.object.userData.id].name)}}
+function place(){let item=hotbar[selected];if(!BLOCKS[item.id]?.place){show('Select a block');return}if(item.count<=0){show('No blocks');return}let hits=aimedHits();let p;if(hits.length&&hits[0].object.userData?.type==='block'){let h=hits[0];p=h.object.position.clone().add(h.face.normal).floor()}else{let dir=new THREE.Vector3();camera.getWorldDirection(dir);p=player.pos.clone().add(dir.multiplyScalar(4)).floor()}world.addBlock(p.x,p.y,p.z,item.id,scene,true);item.count--;renderHotbar();show('Placed '+BLOCKS[item.id].name)}
+function shoot(){
+ let item=hotbar[selected].id;
+ if(item!=='blaster'&&item!=='m16'){show('Select a blaster');return}
+ let ammo=hotbar.find(h=>h.id==='ammo');if(!ammo||ammo.count<=0){show('No ammo');return}
+ ammo.count--;
+ let dir=new THREE.Vector3();camera.getWorldDirection(dir);
+ // v0.6: direct aim scan so rifle definitely damages mobs
+ let best=null,bestDot=.985,bestDist=999;
+ for(let m of mobs.list){
+   let to=m.position.clone().sub(player.pos);let distance=to.length();to.normalize();
+   let dot=dir.dot(to);
+   if(distance<55&&dot>bestDot&&distance<bestDist){best=m;bestDot=dot;bestDist=distance}
+ }
+ if(best){mobs.damage(best,item==='m16'?48:32);show('Rifle hit '+best.userData.type)}
+ let bmesh=new THREE.Mesh(new THREE.SphereGeometry(.13,8,8),new THREE.MeshBasicMaterial({color:0xffff00}));
+ bmesh.position.copy(player.pos);scene.add(bmesh);bullets.push({mesh:bmesh,dir,life:40,dmg:item==='m16'?48:32});
+ renderHotbar()
+}
+function updateBullets(){for(let b of bullets){b.mesh.position.add(b.dir.clone().multiplyScalar(1.2));b.life--;for(let m of mobs.list)if(m.position.distanceTo(b.mesh.position)<1.4){mobs.damage(m,b.dmg);b.life=0}}bullets=bullets.filter(b=>{if(b.life<=0){scene.remove(b.mesh);return false}return true})}
+function drawMiniMap(){
+ let dot=document.getElementById('playerDot'); if(!dot)return;
+ let w=210,h=74;
+ let px=(player.pos.x+260)/380*w;
+ let py=(player.pos.z+90)/180*h;
+ px=Math.max(0,Math.min(w-12,px));py=Math.max(0,Math.min(h-12,py));
+ dot.style.left=px+'px';dot.style.top=py+'px';
+}
+function hud(){document.getElementById('hp').textContent=Math.ceil(player.hp);document.getElementById('mode').textContent=spectator?'spectator':'survival';document.getElementById('mobs').textContent=mobs.list.length;document.getElementById('blocks').textContent=world.meshes.length+world.placed.length;document.getElementById('biome').textContent=biomeAt(player.pos.x,player.pos.z)}
+function animate(){requestAnimationFrame(animate);if(started&&player.hp>0){frame++;player.update();if(frame%30===0)world.loadAround(player.pos);mobs.update();updateBullets()}camera.position.copy(player.pos);camera.rotation.order='YXZ';camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;hud();renderer.render(scene,camera)}
+document.getElementById('startBtn').onclick=()=>{started=true;document.getElementById('menu').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('hotbar').style.display='flex';document.getElementById('cross').style.display='block';document.getElementById('minimapBox').style.display='block';document.body.requestPointerLock?.();show('v0.3: structures, rivers, trees, animals')};
+document.body.onclick=()=>{if(started)document.body.requestPointerLock?.()};
+document.onmousemove=e=>{if(!started||document.pointerLockElement!==document.body)return;player.yaw-=e.movementX*.002;player.pitch-=e.movementY*.002;player.pitch=Math.max(-1.45,Math.min(1.45,player.pitch))};
+document.onkeydown=e=>{keys[e.code]=true;if(e.code.startsWith('Digit')){let n=Number(e.code.replace('Digit',''));if(n>=1&&n<=9){selected=n-1;renderHotbar()}}if(e.code==='KeyF')shoot();if(e.code==='KeyM'){spectator=!spectator;show(spectator?'Spectator':'Survival')}};
+document.onkeyup=e=>keys[e.code]=false;
+document.onmousedown=e=>{if(!started)return;if(e.button===0)mineAttack();if(e.button===2)place()};
+document.oncontextmenu=e=>e.preventDefault();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+world.loadAround(player.pos);world.structure(72,32,world.group,'volcano_shrine');world.structure(90,42,world.group,'tower');for(let i=0;i<12;i++){let a=Math.random()*Math.PI*2,r=15+Math.random()*25;let type=i<5?['cow','pig','chicken','sheep','wolf'][i]:(i%3===0?'lava_guard':'fire_imp');mobs.spawn(player.pos.x+Math.cos(a)*r,player.pos.z+Math.sin(a)*r,type)}renderHotbar();animate();
+})();
+</script>
 </body>
 </html>
-
-
